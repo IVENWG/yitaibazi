@@ -71,15 +71,32 @@ function tenGod(dayStem, otherStem) {
   return '未知';
 }
 
+function tenGodShort(dayStem, otherStem) {
+  const full = tenGod(dayStem, otherStem);
+  return {
+    比肩: '比',
+    劫财: '劫',
+    食神: '食',
+    伤官: '伤',
+    偏财: '财',
+    正财: '才',
+    七杀: '杀',
+    正官: '官',
+    偏印: '枭',
+    正印: '印',
+  }[full] || full;
+}
+
 function analyzeTenGods(pillars) {
   const dayStem = pillars.day.stem;
   const result = {};
   for (const [position, pillar] of Object.entries(pillars)) {
     result[position] = {
       stem: tenGod(dayStem, pillar.stem),
+      stemShort: tenGodShort(dayStem, pillar.stem),
       hiddenStems: (HIDDEN_STEMS[branchIndex(pillar.branch)] || [])
         .filter(s => s && s.trim())
-        .map(stem => ({ stem, tenGod: tenGod(dayStem, stem) })),
+        .map(stem => ({ stem, tenGod: tenGod(dayStem, stem), tenGodShort: tenGodShort(dayStem, stem) })),
     };
   }
   return result;
@@ -90,5 +107,6 @@ module.exports = {
   analyzeWuxing,
   elementRelation,
   tenGod,
+  tenGodShort,
   analyzeTenGods,
 };

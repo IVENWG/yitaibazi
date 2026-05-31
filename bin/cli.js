@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 
-const { compute } = require('../src');
+const { compute, computeFullChart, formatChartReport } = require('../src');
 
 function parseArgs(argv) {
   const args = {};
@@ -26,6 +26,7 @@ function printHelp() {
 
 用法：
   yitai-bazi --year 1990 --month 8 --day 15 --hour 14 --minute 30 --city 北京市区
+  yitai-bazi --year 2026 --month 5 --day 31 --hour 15 --minute 53 --city 北京怀柔区 --sex 男 --name 发 --full
 
 参数：
   --year     公历年
@@ -34,6 +35,9 @@ function printHelp() {
   --hour     小时（0-23）
   --minute   分钟（默认 0）
   --city     地区名（默认 北京市区；可用数据库中的地区名，如 北京市区、上海市区）
+  --sex      性别：男/女（默认 男）
+  --name     姓名（默认 发）
+  --full     输出完整排盘报告
   --no-true-solar-time  不换算真太阳时
   --help     显示帮助
 `);
@@ -53,8 +57,15 @@ function main() {
     hour: Number(args.hour),
     minute: Number(args.minute || 0),
     city: args.city || '北京市区',
+    sex: args.sex || '男',
+    name: args.name || '发',
     useTrueSolarTime: !args['no-true-solar-time'],
   };
+
+  if (args.full) {
+    console.log(formatChartReport(computeFullChart(input)));
+    return;
+  }
 
   const result = compute(input);
   const p = result.pillars;
