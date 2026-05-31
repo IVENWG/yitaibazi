@@ -3,6 +3,7 @@
 const { STEM_ELEMENTS, BRANCH_ELEMENTS, HIDDEN_STEMS } = require('../core/constants');
 const { branchIndex } = require('../core/utils');
 const { ELEMENTS, elementRelation, tenGod } = require('./wuxing');
+const { classifyPattern } = require('./pattern');
 
 const STEM_WEIGHT = 10;
 const BRANCH_MAIN_WEIGHT = 8;
@@ -122,32 +123,6 @@ function supportText(dayElement, scores) {
   return { same, resource, opposing, supportingScore, drainingScore, difference: score, score };
 }
 
-function classifyPattern(pillars, tenGods, level) {
-  const monthHidden = tenGods.month.hiddenStems;
-  const mainTenGod = monthHidden[0]?.tenGod || tenGods.month.stem;
-  const dayStem = pillars.day.stem;
-  const monthBranch = pillars.month.branch;
-
-  if ((dayStem === '甲' && monthBranch === '寅') || (dayStem === '乙' && monthBranch === '卯') ||
-      (dayStem === '丙' && monthBranch === '巳') || (dayStem === '丁' && monthBranch === '午') ||
-      (dayStem === '戊' && monthBranch === '巳') || (dayStem === '己' && monthBranch === '午') ||
-      (dayStem === '庚' && monthBranch === '申') || (dayStem === '辛' && monthBranch === '酉') ||
-      (dayStem === '壬' && monthBranch === '亥') || (dayStem === '癸' && monthBranch === '子')) {
-    return '建禄格';
-  }
-
-  if ((dayStem === '甲' && monthBranch === '卯') || (dayStem === '乙' && monthBranch === '寅') ||
-      (dayStem === '丙' && monthBranch === '午') || (dayStem === '丁' && monthBranch === '巳') ||
-      (dayStem === '戊' && monthBranch === '午') || (dayStem === '己' && monthBranch === '巳') ||
-      (dayStem === '庚' && monthBranch === '酉') || (dayStem === '辛' && monthBranch === '申') ||
-      (dayStem === '壬' && monthBranch === '子') || (dayStem === '癸' && monthBranch === '亥')) {
-    return '月刃格';
-  }
-
-  if (['太旺', '太弱'].includes(level)) return `${level}格局待详断`;
-  return mainTenGod && mainTenGod !== '比肩' ? `${mainTenGod}格` : '普通格局';
-}
-
 function pickUsefulGods(dayElement, level) {
   if (level === '中和') {
     const useful = USEFUL_FOR_STRONG[dayElement].slice(0, 2);
@@ -180,7 +155,7 @@ function analyzeStrength(pillars, tenGods) {
   const support = supportText(dayElement, scores);
   const level = strengthLevel(support.score);
   const gods = pickUsefulGods(dayElement, level);
-  const pattern = classifyPattern(pillars, tenGods, level);
+  const pattern = classifyPattern(pillars);
 
   return {
     dayMaster: { stem: pillars.day.stem, element: dayElement },

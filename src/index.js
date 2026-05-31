@@ -8,6 +8,7 @@ const { fourBranchStrengths } = require('./core/changsheng');
 const { nayin } = require('./core/nayin');
 const { analyzeWuxing, analyzeTenGods, tenGod, tenGodShort } = require('./analysis/wuxing');
 const { analyzeStrength } = require('./analysis/strength');
+const { classifyPattern } = require('./analysis/pattern');
 const { analyzeChenggu } = require('./analysis/chenggu');
 const { analyzeShensha } = require('./analysis/shensha');
 const { formatChartReport } = require('./report/chart-report');
@@ -60,5 +61,6 @@ module.exports = {
   tenGod,
   tenGodShort,
   analyzeChenggu,
+  classifyPattern,
   constants,
 };
