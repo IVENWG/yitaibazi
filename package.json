@@ -1,0 +1,19 @@
+{
+  "name": "yitai-bazi",
+  "version": "0.1.0",
+  "description": "已泰八字 - 基于 Node.js 的八字排盘与命理分析工具",
+  "main": "src/index.js",
+  "bin": {
+    "yitai-bazi": "./bin/cli.js"
+  },
+  "scripts": {
+    "start": "node bin/cli.js",
+    "test": "node --test test/*.test.js"
+  },
+  "keywords": ["bazi", "八字", "four-pillars", "四柱", "chinese-astrology", "命理"],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
