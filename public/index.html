@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>已泰八字</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117;--surface:#1a1d27;--surface2:#242836;--border:#2e3348;
+  --text:#e8eaf0;--text2:#8b90a8;--accent:#6c5ce7;--accent2:#a29bfe;
+  --wood:#48c774;--fire:#ff6b6b;--earth:#f0b86e;--metal:#c8ccd8;--water:#74b9ff;
+  --radius:12px;--shadow:0 4px 24px rgba(0,0,0,.3);
+}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans SC",sans-serif;background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh}
+a{color:var(--accent2);text-decoration:none}
+
+/* Layout */
+.app{max-width:960px;margin:0 auto;padding:24px 16px}
+header{text-align:center;margin-bottom:32px}
+header h1{font-size:28px;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+header p{color:var(--text2);font-size:14px;margin-top:4px}
+
+/* Form */
+.form-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:32px}
+.form-row{display:flex;gap:12px;flex-wrap:wrap;align-items:end}
+.field{display:flex;flex-direction:column;gap:4px;flex:1;min-width:100px}
+.field label{font-size:12px;color:var(--text2);font-weight:500}
+.field input,.field select{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:14px;outline:none;transition:border-color .2s}
+.field input:focus,.field select:focus{border-color:var(--accent)}
+.btn{background:linear-gradient(135deg,var(--accent),#7c6cf0);color:#fff;border:none;border-radius:8px;padding:10px 28px;font-size:15px;font-weight:600;cursor:pointer;transition:transform .1s,box-shadow .2s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(108,92,231,.4)}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+/* Result */
+.result{display:none}
+.result.show{display:block;animation:fadeUp .4s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+/* Section cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px}
+.card-title{font-size:15px;font-weight:600;color:var(--accent2);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.card-title::before{content:'';width:3px;height:16px;background:var(--accent);border-radius:2px}
+
+/* Info header */
+.info-header{display:flex;flex-wrap:wrap;gap:16px 32px;align-items:center}
+.info-header .name{font-size:22px;font-weight:700}
+.info-header .meta{font-size:13px;color:var(--text2)}
+
+/* Pillars */
+.pillars-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:8px}
+.pillar{text-align:center}
+.pillar-label{font-size:12px;color:var(--text2);margin-bottom:8px}
+.pillar-stem{font-size:28px;font-weight:700;line-height:1.3}
+.pillar-branch{font-size:28px;font-weight:700;line-height:1.3}
+.pillar-tg{font-size:12px;color:var(--text2);margin-top:4px}
+.pillar-hidden{font-size:11px;color:var(--text2);margin-top:2px}
+.pillar-bs{font-size:11px;color:var(--accent2);margin-top:2px}
+
+/* Element colors */
+.el-木{color:var(--wood)}.el-火{color:var(--fire)}.el-土{color:var(--earth)}.el-金{color:var(--metal)}.el-水{color:var(--water)}
+
+/* Strength */
+.strength-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+.strength-item{text-align:center;padding:12px;background:var(--surface2);border-radius:8px}
+.strength-value{font-size:24px;font-weight:700}
+.strength-label{font-size:12px;color:var(--text2);margin-top:2px}
+
+/* Pattern & gods */
+.pattern-row{display:flex;flex-wrap:wrap;gap:24px}
+.pattern-box,.gods-box{flex:1;min-width:200px}
+.pattern-name{font-size:20px;font-weight:700;color:var(--accent2)}
+.gods-list{display:flex;gap:16px;margin-top:8px}
+.god-item{text-align:center}
+.god-type{font-size:11px;color:var(--text2)}
+.god-value{font-size:15px;font-weight:600;margin-top:2px}
+.god-useful .god-value{color:var(--wood)}
+.god-unfavorable .god-value{color:var(--fire)}
+
+/* Level bar */
+.level-bar{margin-top:12px}
+.level-track{height:6px;background:var(--surface2);border-radius:3px;position:relative;overflow:visible}
+.level-indicator{width:12px;height:12px;border-radius:50%;background:var(--accent);position:absolute;top:-3px;transform:translateX(-50%)}
+.level-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-top:4px}
+.level-active{color:var(--accent2);font-weight:600}
+
+/* Da Yun */
+.dayun-scroll{overflow-x:auto;padding-bottom:8px}
+.dayun-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;min-width:720px}
+.dayun-col{text-align:center}
+.dayun-col .age{font-size:11px;color:var(--text2)}
+.dayun-col .dy-pillar{font-size:16px;font-weight:600;margin:4px 0}
+.dayun-col .dy-tg{font-size:10px;color:var(--text2)}
+.liunian-grid{display:grid;grid-template-rows:repeat(10,1fr);gap:1px;margin-top:6px}
+.liunian-item{font-size:10px;color:var(--text2);padding:2px 0;white-space:nowrap}
+.liunian-item .ln-year{color:var(--text2)}
+.liunian-item .ln-pillar{color:var(--text)}
+
+/* Shensha */
+.shensha-list{display:flex;flex-wrap:wrap;gap:8px}
+.shensha-tag{background:var(--surface2);border-radius:6px;padding:4px 10px;font-size:13px}
+.shensha-tag .ss-pos{color:var(--text2);font-size:11px}
+
+/* Responsive */
+@media(max-width:600px){
+  .form-row{flex-direction:column}
+  .pillars-grid{grid-template-columns:repeat(4,1fr);gap:8px}
+  .pillar-stem,.pillar-branch{font-size:22px}
+  .card{padding:16px}
+}
+
+/* Loading */
+.loading{text-align:center;padding:40px;color:var(--text2)}
+.loading::after{content:'';display:inline-block;width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-left:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Error */
+.error{background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.3);border-radius:var(--radius);padding:16px;color:var(--fire);margin-bottom:20px}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>已泰八字</h1>
+    <p>基于南方批八字逆向工程的开源 Node.js 排盘系统</p>
+  </header>
+
+  <div class="form-card">
+    <form id="chartForm" class="form-row">
+      <div class="field">
+        <label>姓名</label>
+        <input type="text" name="name" value="发" placeholder="姓名">
+      </div>
+      <div class="field">
+        <label>性别</label>
+        <select name="sex">
+          <option value="男">男</option>
+          <option value="女">女</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>年</label>
+        <input type="number" name="year" value="2026" min="1900" max="2100">
+      </div>
+      <div class="field">
+        <label>月</label>
+        <input type="number" name="month" value="5" min="1" max="12">
+      </div>
+      <div class="field">
+        <label>日</label>
+        <input type="number" name="day" value="31" min="1" max="31">
+      </div>
+      <div class="field">
+        <label>时</label>
+        <input type="number" name="hour" value="15" min="0" max="23">
+      </div>
+      <div class="field">
+        <label>分</label>
+        <input type="number" name="minute" value="53" min="0" max="59">
+      </div>
+      <div class="field" style="flex:2">
+        <label>出生地</label>
+        <input type="text" name="city" value="北京怀柔区" placeholder="如：北京市区">
+      </div>
+      <button type="submit" class="btn" id="submitBtn">排盘</button>
+    </form>
+  </div>
+
+  <div id="error" class="error" style="display:none"></div>
+  <div id="loading" class="loading" style="display:none">正在排盘</div>
+
+  <div id="result" class="result">
+    <!-- Info -->
+    <div class="card">
+      <div class="info-header">
+        <span class="name" id="infoName"></span>
+        <span class="meta" id="infoGender"></span>
+        <span class="meta" id="infoSolar"></span>
+        <span class="meta" id="infoTrueSolar"></span>
+        <span class="meta" id="infoLunar"></span>
+      </div>
+    </div>
+
+    <!-- Pillars -->
+    <div class="card">
+      <div class="card-title">四柱八字</div>
+      <div class="pillars-grid" id="pillarsGrid"></div>
+    </div>
+
+    <!-- Five Elements Strength -->
+    <div class="card">
+      <div class="card-title">五行力量</div>
+      <div class="strength-grid" id="strengthGrid"></div>
+      <div class="level-bar" id="levelBar"></div>
+    </div>
+
+    <!-- Pattern & Gods -->
+    <div class="card">
+      <div class="card-title">格局与喜忌</div>
+      <div class="pattern-row">
+        <div class="pattern-box">
+          <div class="pattern-name" id="patternName"></div>
+          <div style="margin-top:4px;color:var(--text2);font-size:13px" id="patternLevel"></div>
+          <div style="margin-top:8px;font-size:13px;color:var(--text2)" id="patternAdvice"></div>
+        </div>
+        <div class="gods-box">
+          <div class="gods-list">
+            <div class="god-item god-useful">
+              <div class="god-type">喜用神</div>
+              <div class="god-value" id="godsUseful"></div>
+            </div>
+            <div class="god-item god-unfavorable">
+              <div class="god-type">忌神</div>
+              <div class="god-value" id="godsUnfavorable"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Same/Different Party -->
+    <div class="card">
+      <div class="card-title">同类 / 异类</div>
+      <div class="strength-grid">
+        <div class="strength-item">
+          <div class="strength-value" id="sameScore"></div>
+          <div class="strength-label">同类（<span id="sameParty"></span>）</div>
+        </div>
+        <div class="strength-item">
+          <div class="strength-value" id="diffScore"></div>
+          <div class="strength-label">异类（<span id="diffParty"></span>）</div>
+        </div>
+        <div class="strength-item">
+          <div class="strength-value" id="diffValue"></div>
+          <div class="strength-label">相差</div>
+        </div>
+        <div class="strength-item">
+          <div class="strength-value" id="totalScore"></div>
+          <div class="strength-label">综合旺衰</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Da Yun -->
+    <div class="card">
+      <div class="card-title">大运流年</div>
+      <div class="meta" style="font-size:13px;color:var(--text2);margin-bottom:12px" id="luckInfo"></div>
+      <div class="dayun-scroll">
+        <div class="dayun-grid" id="dayunGrid"></div>
+      </div>
+    </div>
+
+    <!-- Shen Sha -->
+    <div class="card">
+      <div class="card-title">神煞</div>
+      <div class="shensha-list" id="shenshaList"></div>
+    </div>
+
+    <!-- Nayin & Wuxing -->
+    <div class="card">
+      <div class="card-title">纳音 · 五行</div>
+      <div style="display:flex;flex-wrap:wrap;gap:16px">
+        <div id="nayinInfo" style="font-size:14px;line-height:2"></div>
+        <div id="wuxingInfo" style="font-size:14px;line-height:2"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const POS = ['year','month','day','hour'];
+const POS_LABEL = {year:'年柱',month:'月柱',day:'日柱',hour:'时柱'};
+
+const elClass = {木:'el-木',火:'el-火',土:'el-土',金:'el-金',水:'el-水'};
+
+$('chartForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const params = Object.fromEntries(fd.entries());
+
+  $('error').style.display = 'none';
+  $('result').className = 'result';
+  $('loading').style.display = 'block';
+  $('submitBtn').disabled = true;
+
+  try {
+    const qs = new URLSearchParams(params).toString();
+    const res = await fetch('/api/chart?' + qs);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || '排盘失败');
+    render(data);
+    $('result').className = 'result show';
+  } catch (err) {
+    $('error').textContent = err.message;
+    $('error').style.display = 'block';
+  } finally {
+    $('loading').style.display = 'none';
+    $('submitBtn').disabled = false;
+  }
+});
+
+function render(c) {
+  const { pillars: p, trueSolar: t, lunar, luck, strength, shensha, nayins, wuxing, tenGods, branchStrengths, input } = c;
+
+  // Info
+  $('infoName').textContent = input.name || '—';
+  $('infoGender').textContent = input.sex === '女' ? '坤造' : '乾造';
+  $('infoSolar').textContent = `公历 ${input.year}-${pad(input.month)}-${pad(input.day)} ${pad(input.hour)}:${pad(input.minute)}`;
+  $('infoTrueSolar').textContent = `真太阳时 ${t.year}-${pad(t.month)}-${pad(t.day)} ${pad(t.hour)}:${pad(t.minute)}`;
+  $('infoLunar').textContent = `农历 ${lunar.yearText}年${lunar.monthText}${lunar.dayText}`;
+
+  // Pillars
+  const bsMap = branchStrengths || {};
+  $('pillarsGrid').innerHTML = POS.map(pos => {
+    const pl = p[pos];
+    const tg = pos === 'day' ? '日' : (tenGods[pos]?.stemShort || '');
+    const hidden = (tenGods[pos]?.hiddenStems || []).map(h => h.tenGodShort).join('');
+    const bs = bsMap[pos] || '';
+    return `<div class="pillar">
+      <div class="pillar-label">${POS_LABEL[pos]}</div>
+      <div class="pillar-tg">${tg}</div>
+      <div class="pillar-stem">${pl.stem}</div>
+      <div class="pillar-branch">${pl.branch}</div>
+      <div class="pillar-hidden">${hidden}</div>
+      <div class="pillar-bs">${bs}</div>
+    </div>`;
+  }).join('');
+
+  // Strength
+  if (strength) {
+    const elColors = {木:'var(--wood)',火:'var(--fire)',土:'var(--earth)',金:'var(--metal)',水:'var(--water)'};
+    $('strengthGrid').innerHTML = ['木','火','土','金','水'].map(el =>
+      `<div class="strength-item">
+        <div class="strength-value" style="color:${elColors[el]}">${strength.scores[el]}</div>
+        <div class="strength-label">${el}</div>
+      </div>`
+    ).join('');
+
+    // Level bar
+    const levels = ['太弱','偏弱','中和','偏旺','太旺'];
+    const levelIdx = levels.indexOf(strength.level);
+    const pct = levelIdx >= 0 ? ((levelIdx + 0.5) / levels.length * 100) : 50;
+    $('levelBar').innerHTML = `
+      <div class="level-track"><div class="level-indicator" style="left:${pct}%"></div></div>
+      <div class="level-labels">${levels.map((l,i) =>
+        `<span class="${i===levelIdx?'level-active':''}">${l}</span>`
+      ).join('')}</div>`;
+
+    // Pattern
+    $('patternName').textContent = strength.pattern;
+    $('patternLevel').textContent = `日主 ${strength.level}（${strength.dayMaster.stem}${strength.dayMaster.element}）`;
+    $('patternAdvice').textContent = strength.advice;
+
+    // Gods
+    $('godsUseful').textContent = (strength.usefulGods || []).join('、') || '待定';
+    $('godsUnfavorable').textContent = (strength.unfavorable || []).join('、') || '待定';
+
+    // Same/diff
+    $('sameScore').textContent = strength.samePartyScore;
+    $('sameParty').textContent = (strength.sameParty || []).join('、');
+    $('diffScore').textContent = strength.differentPartyScore;
+    $('diffParty').textContent = (strength.differentParty || []).join('、');
+    $('diffValue').textContent = strength.difference;
+    $('totalScore').textContent = strength.level;
+  }
+
+  // Da Yun
+  if (luck) {
+    const s = luck.start;
+    $('luckInfo').textContent = `${s.years}岁${s.months}月${s.days}天起运，每运年${s.handoverMonth}月${s.handoverDay}日交运`;
+    $('dayunGrid').innerHTML = luck.pillars.map((dy, i) => {
+      const lnCol = (luck.liunian || [])[i] || [];
+      return `<div class="dayun-col">
+        <div class="age">${s.startAge + i * 10}岁</div>
+        <div class="dy-pillar">${dy.stem}${dy.branch}</div>
+        <div class="dy-tg">${dy.tenGod || ''}</div>
+        <div style="font-size:10px;color:var(--text2)">${s.startYear + i * 10}</div>
+        <div class="liunian-grid">${lnCol.map(ln =>
+          `<div class="liunian-item"><span class="ln-year">${ln.year}</span> <span class="ln-pillar">${ln.pillar}</span></div>`
+        ).join('')}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // Shensha
+  if (shensha?.lines) {
+    $('shenshaList').innerHTML = shensha.lines.map(line =>
+      line.items.length ? line.items.map(item =>
+        `<div class="shensha-tag"><span class="ss-pos">${line.label.replace('柱','')}</span> ${item}</div>`
+      ).join('') : ''
+    ).join('');
+  }
+
+  // Nayin
+  if (nayins) {
+    $('nayinInfo').innerHTML = POS.map(pos =>
+      `<div>${POS_LABEL[pos]} <strong>${nayins[pos]}</strong></div>`
+    ).join('');
+  }
+
+  // Wuxing
+  if (wuxing?.counts) {
+    const elNames = {木:'Wood',火:'Fire',土:'Earth',金:'Metal',水:'Water'};
+    $('wuxingInfo').innerHTML = Object.entries(wuxing.counts).map(([el, n]) =>
+      `<div>五行<strong class="${elClass[el]}">${el}</strong> ${n}</div>`
+    ).join('');
+  }
+}
+
+function pad(n) { return String(n).padStart(2, '0'); }
+</script>
+</body>
+</html>
