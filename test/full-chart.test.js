@@ -29,4 +29,7 @@ test('formats full chart report for screenshot sample', () => {
   assert.equal(chart.luck.start.days, 10);
   assert.match(report, /当月节气：立夏（6日19:50）；中气：小满（21日8:38）/);
   assert.match(report, /2028戊申/);
+  assert.match(report, /年柱：.*文昌/);
+  assert.match(report, /日柱：.*十恶大败日/);
+  assert.match(report, /时柱：.*驿马/);
 });

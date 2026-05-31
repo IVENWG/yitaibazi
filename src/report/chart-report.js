@@ -44,6 +44,11 @@ function formatLiuNianGrid(luck) {
   return lines.join('\n');
 }
 
+function formatShenshaLines(shensha) {
+  if (!shensha?.lines) return [];
+  return shensha.lines.map(line => `${line.label}：${line.items.length ? line.items.join('　') : '无'}`);
+}
+
 function formatChartReport(chart) {
   const input = chart.input;
   const t = chart.trueSolar;
@@ -80,6 +85,8 @@ function formatChartReport(chart) {
   lines.push('　　　　　　' + luck.pillars.map((_, i) => luck.start.startAge + i * 10).join('　　　'));
   lines.push('　　　　　　' + luck.pillars.map((_, i) => luck.start.startYear + i * 10).join('　　　'));
   lines.push(formatLiuNianGrid(luck));
+  lines.push('');
+  lines.push(...formatShenshaLines(chart.shensha));
   lines.push('');
   lines.push(`纳音：年柱${chart.nayins.year}　月柱${chart.nayins.month}　日柱${chart.nayins.day}　时柱${chart.nayins.hour}`);
   lines.push(`五行：木${chart.wuxing.counts.木} 火${chart.wuxing.counts.火} 土${chart.wuxing.counts.土} 金${chart.wuxing.counts.金} 水${chart.wuxing.counts.水}`);
