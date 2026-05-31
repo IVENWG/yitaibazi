@@ -49,6 +49,24 @@ function formatShenshaLines(shensha) {
   return shensha.lines.map(line => `${line.label}：${line.items.length ? line.items.join('　') : '无'}`);
 }
 
+function formatElementScores(scores) {
+  return ['木', '火', '土', '金', '水'].map(element => `${element}${scores[element]}`).join('　');
+}
+
+function formatStrengthLines(strength) {
+  if (!strength) return [];
+  return [
+    '八字五行得分：',
+    `五行力量：${formatElementScores(strength.scores)}`,
+    `同类：${strength.sameParty.join('、')}，得分：${strength.samePartyScore}`,
+    `异类：${strength.differentParty.join('、')}，得分：${strength.differentPartyScore}`,
+    `相差：${strength.difference}　综合旺衰：${strength.level}`,
+    `格局初判：${strength.pattern}`,
+    `喜用神：${strength.usefulGods.length ? strength.usefulGods.join('、') : '待定'}　忌神：${strength.unfavorable.length ? strength.unfavorable.join('、') : '待定'}`,
+    `说明：${strength.advice}`,
+  ];
+}
+
 function formatChartReport(chart) {
   const input = chart.input;
   const t = chart.trueSolar;
@@ -85,6 +103,8 @@ function formatChartReport(chart) {
   lines.push('　　　　　　' + luck.pillars.map((_, i) => luck.start.startAge + i * 10).join('　　　'));
   lines.push('　　　　　　' + luck.pillars.map((_, i) => luck.start.startYear + i * 10).join('　　　'));
   lines.push(formatLiuNianGrid(luck));
+  lines.push('');
+  lines.push(...formatStrengthLines(chart.strength));
   lines.push('');
   lines.push(...formatShenshaLines(chart.shensha));
   lines.push('');

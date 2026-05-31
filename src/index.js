@@ -7,6 +7,7 @@ const { computeLuck } = require('./core/luck');
 const { fourBranchStrengths } = require('./core/changsheng');
 const { nayin } = require('./core/nayin');
 const { analyzeWuxing, analyzeTenGods, tenGod, tenGodShort } = require('./analysis/wuxing');
+const { analyzeStrength } = require('./analysis/strength');
 const { analyzeChenggu } = require('./analysis/chenggu');
 const { analyzeShensha } = require('./analysis/shensha');
 const { formatChartReport } = require('./report/chart-report');
@@ -32,6 +33,7 @@ function computeFullChart(input) {
   const branchStrengths = fourBranchStrengths(pillars);
   const nayins = Object.fromEntries(Object.entries(pillars).map(([k, v]) => [k, nayin(v.pillar)]));
   const shensha = analyzeShensha(pillars);
+  const strength = analyzeStrength(pillars, base.tenGods);
 
   return {
     ...base,
@@ -40,6 +42,7 @@ function computeFullChart(input) {
     branchStrengths,
     nayins,
     shensha,
+    strength,
   };
 }
 
@@ -52,6 +55,7 @@ module.exports = {
   findCity,
   analyzeWuxing,
   analyzeTenGods,
+  analyzeStrength,
   analyzeShensha,
   tenGod,
   tenGodShort,
